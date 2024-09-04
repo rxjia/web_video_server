@@ -55,56 +55,23 @@ WebVideoServer::WebVideoServer(const std::string& nodeName) :
     handler_group_(
         async_web_server_cpp::HttpReply::stock_reply(async_web_server_cpp::HttpReply::not_found))
 {
-  declare_parameter("port", rclcpp::PARAMETER_INTEGER);
-  declare_parameter("verbose", rclcpp::PARAMETER_BOOL);
-  declare_parameter("address", rclcpp::PARAMETER_STRING);
-  declare_parameter("server_threads", rclcpp::PARAMETER_INTEGER);
-  declare_parameter("ros_threads", rclcpp::PARAMETER_INTEGER);
-  declare_parameter("publish_rate", rclcpp::PARAMETER_DOUBLE);
-  declare_parameter("default_stream_type", rclcpp::PARAMETER_STRING);
+  declare_parameter<int>("port", 8080);
+  declare_parameter<bool>("verbose", true);
+  declare_parameter<std::string>("address", "0.0.0.0");
+  declare_parameter<int>("server_threads", 1);
+  declare_parameter<int>("ros_threads", 2);
+  declare_parameter<double>("publish_rate", -1.0);
+  declare_parameter<std::string>("default_stream_type", "mjpeg");
 
-  rclcpp::Parameter parameter;
-  if (get_parameter("port", parameter)) {
-    port_ = parameter.as_int();
-  } else {
-    port_ = 8080;
-  }
-  if (get_parameter("verbose", parameter)) {
-    __verbose = parameter.as_bool();
-  } else {
-    __verbose = true;
-  }
-
-  if (get_parameter("address", parameter)) {
-    address_ = parameter.as_string();
-  } else {
-    address_ = "0.0.0.0";
-  }
-
+  get_parameter<int>("port", port_);
+  get_parameter<bool>("verbose", __verbose);
+  get_parameter<std::string>("address", address_);
   int server_threads;
-  if (get_parameter("server_threads", parameter)) {
-    server_threads = parameter.as_int();
-  } else {
-    server_threads = 1;
-  }
-
-  if (get_parameter("ros_threads", parameter)) {
-    ros_threads_ = parameter.as_int();
-  } else {
-    ros_threads_ = 2;
-  }
-  if (get_parameter("publish_rate", parameter)) {
-    publish_rate_ = parameter.as_double();
-  } else {
-    publish_rate_ = -1.0;
-  }
-
-  if (get_parameter("default_stream_type", parameter)) {
-    __default_stream_type = parameter.as_string();
-  } else {
-    __default_stream_type = "mjpeg";
-  }
-
+  get_parameter<int>("server_threads", server_threads);
+  get_parameter<int>("ros_threads", ros_threads_);
+  get_parameter<double>("publish_rate", publish_rate_);
+  get_parameter<std::string>("default_stream_type", __default_stream_type);
+  
   stream_types_["mjpeg"] = boost::shared_ptr<ImageStreamerType>(new MjpegStreamerType());
   stream_types_["png"] = boost::shared_ptr<ImageStreamerType>(new PngStreamerType());
   stream_types_["ros_compressed"] = boost::shared_ptr<ImageStreamerType>(new RosCompressedStreamerType());
@@ -136,6 +103,7 @@ WebVideoServer::WebVideoServer(const std::string& nodeName) :
   }
 
   server_->run();
+  RCLCPP_INFO(get_logger(), "Waiting For connections on %s:%d", address_.c_str(), port_);
 }
 
 WebVideoServer::~WebVideoServer()
