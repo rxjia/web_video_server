@@ -24,7 +24,7 @@ ImageTransportImageStreamer::ImageTransportImageStreamer(const async_web_server_
   output_height_ = request.get_query_param_value_or_default<int>("height", -1);
   invert_ = request.has_query_param("invert");
   default_transport_ = request.get_query_param_value_or_default("default_transport", "raw");
-  qos_profile_name_ = request.get_query_param_value_or_default("qos_profile", "default");
+  qos_profile_name_ = request.get_query_param_value_or_default("qos_profile", "sensor_data");
 }
 
 ImageTransportImageStreamer::~ImageTransportImageStreamer()
